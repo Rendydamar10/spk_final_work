@@ -1,109 +1,507 @@
-# SPK Pemilihan Cryptocurrency — Metode SAW
+# SPK Crypto SAW
 
-Aplikasi skripsi berbasis **Laravel 10**, Blade, Tailwind CSS, dan CoinGecko API untuk membantu pengguna menyusun peringkat cryptocurrency menggunakan **Simple Additive Weighting (SAW)**.
+> Sistem Pendukung Keputusan Pemilihan Aset Cryptocurrency Menggunakan Metode Simple Additive Weighting (SAW) Berbasis Web
 
-## Fitur utama
+![Laravel](https://img.shields.io/badge/Laravel-10-red)
+![PHP](https://img.shields.io/badge/PHP-8.2-blue)
+![MySQL](https://img.shields.io/badge/MySQL-8-orange)
+![License](https://img.shields.io/badge/License-Academic-green)
 
-**Admin:** dashboard, pengelolaan cryptocurrency, kriteria dan bobot, refresh CoinGecko, ranking global, log API, serta ekspor laporan.
+---
 
-**Pengguna:** ranking pribadi, pencarian dan penambahan coin, watchlist, perbandingan coin, grafik harga, dan halaman penjelasan metode.
+# Deskripsi
 
-**Audit perhitungan:** sistem menyimpan nilai mentah, nilai normalisasi, nilai terbobot, skor akhir, peringkat, dan waktu perhitungan untuk setiap alternatif.
+SPK Crypto SAW merupakan aplikasi web yang dibangun sebagai implementasi penelitian skripsi mengenai Sistem Pendukung Keputusan (SPK) untuk membantu pengguna memilih aset cryptocurrency menggunakan metode **Simple Additive Weighting (SAW)**.
 
-## Kriteria default final
+Sistem memanfaatkan data cryptocurrency dari **CoinGecko API**, kemudian melakukan proses normalisasi, pembobotan, dan perangkingan sehingga pengguna memperoleh rekomendasi cryptocurrency berdasarkan kriteria yang telah ditentukan.
 
-| Kode | Kriteria | Atribut | Bobot |
-|---|---|---|---:|
-| `market_cap` | Kapitalisasi Pasar | Benefit | 0,25 |
-| `total_volume` | Volume Transaksi 24 Jam | Benefit | 0,20 |
-| `price_change_percentage_24h` | Perubahan Harga 24 Jam | Benefit | 0,05 |
-| `price_change_percentage_7d_in_currency` | Perubahan Harga 7 Hari | Benefit | 0,10 |
-| `price_change_percentage_30d_in_currency` | Perubahan Harga 30 Hari | Benefit | 0,15 |
-| `volatility` | Volatilitas Historis 30 Hari | Cost | 0,25 |
+Aplikasi dibangun menggunakan Laravel Framework dengan konsep MVC dan memiliki dua jenis pengguna, yaitu **Administrator** dan **User**.
 
-Total bobot kriteria aktif wajib tepat **1,0000**. `market_cap_rank` disimpan sebagai data informatif tetapi dinonaktifkan agar tidak menduplikasi pengaruh kapitalisasi pasar.
+---
 
-> Bobot default adalah konfigurasi awal aplikasi. Dalam naskah skripsi, dasar penetapan bobot harus dijelaskan melalui literatur, pakar, kuesioner, atau metode pembobotan yang digunakan peneliti.
+# Tujuan
 
-## Rumus yang digunakan
+Membantu investor maupun calon investor dalam:
 
-Karena kriteria perubahan harga dapat bernilai negatif, aplikasi menggunakan normalisasi min–max.
+- memperoleh informasi cryptocurrency secara terstruktur
+- membandingkan beberapa cryptocurrency
+- melakukan perangkingan menggunakan metode SAW
+- mempermudah proses pengambilan keputusan investasi
 
-Benefit:
+---
 
-```text
-rij = (xij - min xj) / (max xj - min xj)
+# Fitur
+
+## User
+
+- Login
+- Register
+- Dashboard
+- Ranking Cryptocurrency
+- Watchlist Cryptocurrency
+- Compare Coin
+- Grafik Harga Cryptocurrency
+- Profil Pengguna
+- Update Password
+
+---
+
+## Administrator
+
+- Dashboard Admin
+- Kelola Cryptocurrency
+- Kelola User
+- Kelola Bobot Kriteria
+- Kelola Kriteria
+- Sinkronisasi Data CoinGecko
+- Perhitungan SAW
+
+---
+
+# Metode SPK
+
+Metode yang digunakan adalah:
+
+**Simple Additive Weighting (SAW)**
+
+Tahapan:
+
+1. Menentukan alternatif
+2. Menentukan kriteria
+3. Menentukan bobot
+4. Membentuk matriks keputusan
+5. Normalisasi
+6. Mengalikan dengan bobot
+7. Menjumlahkan nilai preferensi
+8. Menghasilkan ranking
+
+---
+
+# Kriteria Penilaian
+
+| Kriteria                | Tipe    |
+| ----------------------- | ------- |
+| Harga                   | Cost    |
+| Market Cap              | Benefit |
+| Volume 24 Jam           | Benefit |
+| Perubahan Harga 24 Jam  | Benefit |
+| Perubahan Harga 7 Hari  | Benefit |
+| Perubahan Harga 30 Hari | Benefit |
+| Volatilitas 30 Hari     | Cost    |
+
+Bobot setiap kriteria dapat diubah oleh Administrator.
+
+---
+
+# Teknologi
+
+Backend
+
+- Laravel 10
+- PHP 8.2
+- Eloquent ORM
+
+Frontend
+
+- Blade
+- Tailwind CSS
+- Chart.js
+- JavaScript
+
+Database
+
+- MySQL
+
+API
+
+- CoinGecko API
+
+---
+
+# Struktur Sistem
+
+```
+User
+    │
+    ▼
+Laravel
+    │
+    ├── Authentication
+    ├── Dashboard
+    ├── Ranking
+    ├── Watchlist
+    ├── Compare Coin
+    ├── SAW Engine
+    └── CoinGecko Service
+                │
+                ▼
+           CoinGecko API
 ```
 
-Cost:
+---
 
-```text
-rij = (max xj - xij) / (max xj - min xj)
+# Struktur Folder Penting
+
+```
+app/
+
+├── Http/
+│   ├── Controllers/
+│   └── Middleware/
+│
+├── Models/
+│
+├── Services/
+│   └── Crypto/
+│
+├── Console/
+│
+└── Support/
+
+resources/
+
+├── views/
+│
+└── components/
+
+database/
+
+├── migrations/
+└── seeders/
+
+storage/
+
+└── app/public/coin-logos/
 ```
 
-Nilai preferensi:
+---
 
-```text
-Vi = Σ (wj × rij)
+# Alur Sistem
+
+## Ranking Cryptocurrency
+
+```
+User
+
+↓
+
+Pilih Cryptocurrency
+
+↓
+
+Ambil Data CoinGecko
+
+↓
+
+Simpan Database
+
+↓
+
+Hitung SAW
+
+↓
+
+Ranking
 ```
 
-Jika seluruh alternatif memiliki nilai sama pada suatu kriteria, nilai normalisasi kriteria tersebut ditetapkan `1`. Alternatif yang kehilangan satu atau lebih nilai kriteria aktif tidak diikutkan dalam perhitungan dan tidak diperlakukan sebagai nol.
+---
 
-Volatilitas dihitung sebagai **sample standard deviation** dari return harian selama 30 hari dalam satuan persen.
+## Watchlist
 
-## Instalasi
+```
+Cari Coin
+
+↓
+
+CoinGecko API
+
+↓
+
+Tambah Watchlist
+
+↓
+
+Dashboard
+```
+
+---
+
+## Compare Coin
+
+```
+Pilih Coin
+
+↓
+
+2–5 Cryptocurrency
+
+↓
+
+Hitung SAW Lokal
+
+↓
+
+Tampilkan Ranking
+
+↓
+
+Grafik Perbandingan
+```
+
+Perhitungan SAW pada menu Compare Coin **tidak mempengaruhi Ranking Saya** karena dihitung secara independen berdasarkan coin yang dipilih.
+
+---
+
+# Penyimpanan Logo Cryptocurrency
+
+Logo cryptocurrency **tidak ditampilkan langsung dari URL CoinGecko**.
+
+Sistem akan:
+
+1. mengambil URL logo dari CoinGecko
+2. mengunduh logo
+3. menyimpan ke Storage Laravel
+4. menampilkan logo lokal
+
+Lokasi penyimpanan:
+
+```
+storage/app/public/coin-logos/
+```
+
+Browser mengakses melalui:
+
+```
+public/storage
+```
+
+Keuntungan:
+
+- loading lebih cepat
+- tidak bergantung pada CoinGecko
+- tidak terjadi broken image
+- mudah dipindahkan ke hosting
+
+---
+
+# Struktur Database
+
+Tabel utama
+
+- users
+- crypto_coins
+- ranking_sets
+- ranking_results
+- watchlists
+- criteria
+- criterion_weights
+
+---
+
+# Instalasi
+
+Clone project
+
+```bash
+git clone https://github.com/username/spk_crypto_saw.git
+```
+
+Masuk folder
+
+```bash
+cd spk_final_work
+```
+
+Install dependency
 
 ```bash
 composer install
+```
+
+Copy environment
+
+```bash
 cp .env.example .env
+```
+
+Generate key
+
+```bash
 php artisan key:generate
-npm install
-npm run build
-php artisan migrate:fresh --seed
+```
+
+Atur database pada file `.env`
+
+```
+DB_DATABASE=spk_crypto
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+Migrasi
+
+```bash
+php artisan migrate
+```
+
+Seeder
+
+```bash
+php artisan db:seed
+```
+
+Storage Link
+
+```bash
+php artisan storage:link
+```
+
+Download logo cryptocurrency
+
+```bash
+php artisan crypto:sync-logos --force
+```
+
+Jalankan server
+
+```bash
 php artisan serve
 ```
 
-Konfigurasi CoinGecko pada `.env`:
+---
 
-```env
-COINGECKO_BASE_URL=https://api.coingecko.com/api/v3
-COINGECKO_API_KEY=
-CRYPTO_VS_CURRENCY=usd
-```
+# Scheduler
 
-Jalankan pengujian:
+Disarankan menjalankan scheduler Laravel.
+
+Cron Linux
 
 ```bash
-php artisan test
+* * * * * php artisan schedule:run
 ```
 
-Pemeriksaan gaya kode:
+Scheduler digunakan untuk:
 
-```bash
-./vendor/bin/pint --test
-```
+- refresh data cryptocurrency
+- sinkronisasi CoinGecko
+- pembaruan ranking
+- sinkronisasi logo
 
-## Akun dan hak akses
+---
 
-Seeder dapat digunakan untuk membuat data awal. Untuk mengubah pengguna menjadi admin:
+# API
 
-```bash
-php artisan tinker
-```
+Data cryptocurrency diperoleh dari:
 
-```php
-$user = App\Models\User::first();
-$user->update(['role' => 'admin']);
-```
+CoinGecko API
 
-## Artefak skripsi
+Data yang digunakan:
 
-Dokumen pendukung terdapat di folder `docs/`:
+- id
+- symbol
+- name
+- image
+- current_price
+- market_cap
+- total_volume
+- price_change_percentage_24h
+- price_change_percentage_7d
+- price_change_percentage_30d
+- sparkline
+- market_cap_rank
 
-- `METODOLOGI-SAW.md`: definisi kriteria, rumus, asumsi, dan contoh verifikasi.
-- `PENGUJIAN-SKRIPSI.md`: skenario black-box, unit, integrasi, dan UAT.
-- `CHECKLIST-SIDANG.md`: pemeriksaan akhir sebelum demonstrasi.
+---
 
-## Batasan sistem
+# Screenshot
 
-Aplikasi adalah sistem pendukung keputusan, bukan pemberi nasihat investasi. Hasil ranking bergantung pada alternatif, data CoinGecko pada waktu pengambilan, kriteria aktif, dan bobot yang digunakan. Ranking dapat berubah ketika salah satu unsur tersebut berubah.
+Disarankan menambahkan screenshot berikut:
+
+- Login
+- Register
+- Dashboard
+- Ranking Saya
+- Watchlist
+- Compare Coin
+- Admin Dashboard
+- CRUD Cryptocurrency
+- CRUD Kriteria
+- CRUD Bobot
+- Grafik Harga
+- Hasil SAW
+
+---
+
+# Keunggulan Sistem
+
+- Menggunakan metode SAW
+- Menggunakan CoinGecko API
+- Ranking otomatis
+- Watchlist pribadi
+- Compare Coin
+- Grafik harga
+- Penyimpanan logo lokal
+- Mendukung hosting
+- Tidak bergantung pada APP_URL
+- Responsive UI
+- Multi User
+- Laravel MVC
+
+---
+
+# Kekurangan Sistem
+
+- Bergantung pada koneksi internet saat sinkronisasi CoinGecko.
+- Data cryptocurrency berupa snapshot sehingga diperlukan proses refresh untuk memperoleh data terbaru.
+- Belum mendukung metode SPK lain seperti TOPSIS, MOORA, atau WASPAS.
+- Belum menyediakan notifikasi perubahan harga secara real-time.
+
+---
+
+# Pengembangan Selanjutnya
+
+- Integrasi Binance API
+- Real-time WebSocket
+- Machine Learning Recommendation
+- Multi Currency
+- Export PDF
+- Export Excel
+- Mobile App
+- Multi Bahasa
+
+---
+
+# Lisensi
+
+Project ini dibuat untuk keperluan akademik sebagai tugas akhir Program Studi Teknik Informatika.
+
+Penggunaan kembali kode diperbolehkan untuk tujuan pembelajaran dengan tetap mencantumkan sumber.
+
+---
+
+# Penulis
+
+**Rendy**
+
+Program Studi Teknik Informatika
+
+Universitas Nahdlatul Ulama Blitar
+
+---
+
+# Pembimbing
+
+(Dapat diisi sesuai dosen pembimbing)
+
+---
+
+# Ucapan Terima Kasih
+
+Penulis mengucapkan terima kasih kepada:
+
+- Allah SWT
+- Orang Tua
+- Dosen Pembimbing
+- Program Studi Teknik Informatika
+- Universitas Nahdlatul Ulama Blitar
+- CoinGecko sebagai penyedia data cryptocurrency
+- Laravel Framework
